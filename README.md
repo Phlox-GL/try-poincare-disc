@@ -1,14 +1,11 @@
 
-Phlox workflow in [calcit-js](http://calcit-lang.org/)
+[TODO] try to paint Poincare disc
 ----
 
-### Usage
+- Demo https://r.tiye.me/Phlox-GL/try-poincare-disc/
 
-```bash
-yarn
-cr --emit-js -1
-yarn vite
-```
+
+Based on tutorial http://www.malinc.se/noneuclidean/en/poincaretiling.php
 
 ### Workflow
 
