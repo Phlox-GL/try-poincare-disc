@@ -43,6 +43,34 @@
                       :radius r1
                       :radian $ wo-log ([] theta1 theta2)
                       :anticlockwise? true
+        |comp-circle-polygon $ quote
+          defn comp-circle-polygon (parts adjacent parent-radius center p1 p2)
+            let
+                r1 $ let
+                    a $ js/Math.tan
+                      - (* 0.5 &PI) (/ &PI adjacent)
+                    b $ js/Math.tan (/ &PI parts)
+                  * config/space-radius $ sqrt
+                    / (- a b) (+ a b)
+                e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
+              container ({})
+                circle $ {} (:position center) (:radius parent-radius)
+                  :line-style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 200 80 70
+                create-list :container ({})
+                  -> (range parts)
+                    map $ fn (idx)
+                      [] idx $ group ({})
+                        comp-chord-segment
+                          []
+                            * r1 $ cos (* idx e-angle0)
+                            * r1 $ sin (* idx e-angle0)
+                          []
+                            * r1 $ cos
+                              * (inc idx) e-angle0
+                            * r1 $ sin
+                              * (inc idx) e-angle0
+                        noted "\"TODO recursion" $ group ({})
         |comp-container $ quote
           defn comp-container (store)
             ; println "\"Store" store $ :tab store
@@ -50,32 +78,13 @@
                 cursor $ []
                 states $ :states store
                 parts $ noted "\"corners of each piece" 5
-                e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
                 adjacent $ noted "\"put how many pieces togather" 5
-                r1 $ let
-                    a $ js/Math.tan
-                      - (* 0.5 &PI) (/ &PI adjacent)
-                    b $ js/Math.tan (/ &PI parts)
-                  * config/space-radius $ sqrt
-                    / (- a b) (+ a b)
-              container ({})
-                circle $ {}
-                  :position $ [] 0 0
-                  :radius config/space-radius
-                  :line-style $ {} (:width 1) (:alpha 1)
-                    :color $ hslx 200 80 70
-                create-list :container ({})
-                  -> (range parts)
-                    map $ fn (idx)
-                      [] idx $ comp-chord-segment
-                        []
-                          * r1 $ cos (* idx e-angle0)
-                          * r1 $ sin (* idx e-angle0)
-                        []
-                          * r1 $ cos
-                            * (inc idx) e-angle0
-                          * r1 $ sin
-                            * (inc idx) e-angle0
+                r0 config/space-radius
+                e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
+              comp-circle-polygon parts adjacent config/space-radius ([] 0 0) ([] r0 0)
+                []
+                  * r0 $ cos e-angle0
+                  * r0 $ sin e-angle0
         |square-sum3 $ quote
           defn square-sum3 (a b c)
             + (* a a) (* b b) (* c c)
