@@ -70,24 +70,33 @@
           defn calculate-chord (p1 p2)
             let-sugar
                 r config/space-radius
-                ([] x1 y1) p1
-                ([] x2 y2) p2
+                ([] a b) p1
+                ([] c d) p2
+                s3 $ square-sum3 a b r
                 cx $ /
-                  * 0.5 $ -
-                    * (square-sum3 x1 y1 r) y2
-                    * (square-sum3 x1 y1 r) y1
-                  - (* x1 y2) (* y1 x2)
+                  +
+                    * b (+ a c) (- a c)
+                    * b (+ b d) (- b d)
+                    negate $ * s3 (- b d)
+                  , 2
+                    -
+                      * b $ - a c
+                      * a $ - b d
                 cy $ /
-                  * 0.5 $ -
-                    * (square-sum3 x1 y1 r) x2
-                    * (square-sum3 x1 y1 r) x1
-                  - (* y1 x2) (* x1 y2)
+                  +
+                    * a (+ a c) (- a c)
+                    * a (+ b d) (- b d)
+                    negate $ * s3 (- a c)
+                  , 2
+                    -
+                      * a $ - b d
+                      * b $ - a c
                 r1 $ sqrt
                   -
                     + (* cx cx) (* cy cy)
                     * r r
-                theta1 $ js/Math.atan2 (- y1 cy) (- x1 cx)
-                theta2 $ js/Math.atan2 (- y2 cy) (- x2 cx)
+                theta1 $ js/Math.atan2 (- b cy) (- a cx)
+                theta2 $ js/Math.atan2 (- d cy) (- c cx)
               {}
                 :center $ [] cx cy
                 :radius r1
@@ -125,6 +134,7 @@
                 r1 $ :radius info
                 theta1 $ :theta1 info
                 theta2 $ :theta2 info
+              ; js/console.log info
               group ({})
                 ; circle $ {}
                   :position $ [] cx cy
@@ -138,8 +148,16 @@
                     g :arc $ {}
                       :center $ [] cx cy
                       :radius r1
-                      :radian $ wo-log ([] theta1 theta2)
+                      :radian $ if
+                        and (< theta2 0) (> theta1 0)
+                        [] theta1 $ + theta2 (* 2 &PI)
+                        if (< theta2 theta1) ([] theta2 theta1) ([] theta1 theta2)
                       :anticlockwise? false
+                ; polyline $ {}
+                  :style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 20 80 70
+                  :position $ [] 0 0
+                  :points $ [] p1 p2
         |comp-circle-polygon $ quote
           defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
             let
@@ -175,13 +193,13 @@
                   :position $ [] 0 0
                   :points $ wo-log
                     [] ([] 0 0) (:chord-center next-chord) (:next next-chord) (; [] 100 100) (; :center next-circle)
-                polyline $ {}
+                ; polyline $ {}
                   :style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 20 80 70
                   :position $ [] 0 0
                   :points $ wo-log
                     map child-circles $ fn (x) (:p1 x)
-                polyline $ {}
+                ; polyline $ {}
                   :style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 20 80 70
                   :position $ [] 0 0
@@ -217,11 +235,11 @@
                             :radius $ :radius child
                             :line-style $ {} (:width 1) (:alpha 0.5)
                               :color $ hslx 20 80 70
-                          ; comp-chord-segment (:p1 child) (:p2 child)
+                          comp-chord-segment (:p1 child) (:p2 child)
                           if
                             and
                               < (:radius child) radius
-                              < level 4
+                              < level 2
                               > (:radius child) 10
                             comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
         |comp-container $ quote
