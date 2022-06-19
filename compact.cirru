@@ -6,8 +6,72 @@
   :files $ {}
     |app.comp.container $ {}
       :defs $ {}
-        |comp-chord-segment $ quote
-          defn comp-chord-segment (p1 p2) (; println p1 p2)
+        |calc-chord-from-circle-point $ quote
+          defn calc-chord-from-circle-point (center p1 theta)
+            let-sugar
+                  [] a b
+                  , center
+                ([] g h) p1
+                r0 config/space-radius
+                phi $ negate theta
+                cos-phi $ js/Math.cos phi
+                sin-phi $ js/Math.sin phi
+                k1 $ -
+                  * (- g a) cos-phi
+                  * (- h b) sin-phi
+                k2 $ -
+                  * (- g a) sin-phi
+                  * (- h b) cos-phi
+                t-r0-sub $ - (* r0 r0) (* g g) (* h h)
+                t-divide $ + (* 2 g k1) (* 2 h k2)
+                e $ + g
+                  /
+                    + $ * k1 t-r0-sub
+                    , t-divide
+                f $ + h
+                  / (* k2 t-r0-sub) t-divide
+                mirrored $ calculate-mirrored center ([] e f) p1
+              {}
+                :chord-center $ [] e f
+                :next mirrored
+        |calc-next-circle $ quote
+          defn calc-next-circle (center p1 p2 theta)
+            let-sugar
+                  [] a b
+                  , center
+                ([] c d) p1
+                ([] e f) p2
+                phi theta
+                cos-phi $ js/Math.cos phi
+                sin-phi $ js/Math.sin phi
+                k1 $ -
+                  * cos-phi $ - c a
+                  * sin-phi $ - d b
+                k2 $ +
+                  * cos-phi $ - d b
+                  * sin-phi $ - c a
+                t-d $ - (+ d f) (* 2 b)
+                t-c $ - (+ c e) (* 2 a)
+                g $ /
+                  +
+                    * t-c $ - d b
+                      * c $ / k2 k1
+                    * a t-d
+                  - t-d $ * t-c (/ k2 k1)
+                h $ /
+                  +
+                    * t-d $ - c a
+                      * d $ / k1 k2
+                    * b t-c
+                  - t-c $ * t-d (/ k1 k2)
+              {}
+                :center $ [] g h
+                :radius $ js/Math.sqrt
+                  +
+                    square $ - g c
+                    square $ - h d
+        |calculate-chord $ quote
+          defn calculate-chord (p1 p2)
             let-sugar
                 r config/space-radius
                 ([] x1 y1) p1
@@ -28,8 +92,45 @@
                     * r r
                 theta1 $ js/Math.atan2 (- y1 cy) (- x1 cx)
                 theta2 $ js/Math.atan2 (- y2 cy) (- x2 cx)
+              {}
+                :center $ [] cx cy
+                :radius r1
+                :theta1 theta1
+                :theta2 theta2
+        |calculate-mirrored $ quote
+          defn calculate-mirrored (p1 p2 p0)
+            let-sugar
+                  [] a b
+                  , p1
+                ([] c d) p2
+                ([] e f) p0
+                k $ negate
+                  /
+                    +
+                      * (- a e) (- c a)
+                      * (- b f) (- d b)
+                    +
+                      square $ - a c
+                      square $ - b d
+                footer $ []
+                  + a $ * (wo-log k) (- c a)
+                  + b $ * k (- d b)
+              complex/minus
+                complex/times footer $ [] 2 0
+                , p0
+        |comp-chord-segment $ quote
+          defn comp-chord-segment (p1 p2) (; println p1 p2)
+            let
+                r config/space-radius
+                info $ calculate-chord p1 p2
+                center $ :center info
+                cx $ nth center 0
+                cy $ nth center 1
+                r1 $ :radius info
+                theta1 $ :theta1 info
+                theta2 $ :theta2 info
               group ({})
-                circle $ {}
+                ; circle $ {}
                   :position $ [] cx cy
                   :radius r1
                   :line-style $ {} (:width 1) (:alpha 1)
@@ -44,19 +145,44 @@
                       :radian $ wo-log ([] theta1 theta2)
                       :anticlockwise? true
         |comp-circle-polygon $ quote
-          defn comp-circle-polygon (parts adjacent parent-radius center p1 p2)
+          defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle)
             let
-                r1 $ let
-                    a $ js/Math.tan
-                      - (* 0.5 &PI) (/ &PI adjacent)
-                    b $ js/Math.tan (/ &PI parts)
-                  * config/space-radius $ sqrt
-                    / (- a b) (+ a b)
+                r1 radius
                 e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
+                next-chord $ calc-chord-from-circle-point center p1 delta-angle
+                next-circle $ calc-next-circle center p1 (:next next-chord) delta-angle
+                child-circles $ loop
+                    acc $ []
+                    idx 0
+                    cursor-point p1
+                  ; println acc idx cursor-point
+                  identity $ if (>= idx parts) (wo-log acc)
+                    let
+                        next-chord $ calc-chord-from-circle-point center cursor-point delta-angle
+                        next-circle $ calc-next-circle center cursor-point (:next next-chord) delta-angle
+                      recur
+                        conj acc $ {} (:p1 cursor-point)
+                          :p2 $ :next next-chord
+                          :center $ :center next-circle
+                          :radius $ :radius next-circle
+                        inc idx
+                        :next next-chord
+              ; println next-chord next-circle
+              js/console.log "\"circles" child-circles
               container ({})
-                circle $ {} (:position center) (:radius parent-radius)
-                  :line-style $ {} (:width 1) (:alpha 1)
-                    :color $ hslx 200 80 70
+                circle $ {} (:position center) (:radius radius)
+                  :line-style $ {} (:width 1) (:alpha 0.5)
+                    :color $ hslx 20 80 70
+                polyline $ {}
+                  :style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 20 80 70
+                  :position $ [] 0 0
+                  :points $ [] ([] 0 0) (:chord-center next-chord) (:next next-chord) ([] 100 100) (:center next-circle)
+                ; circle $ {}
+                  :position $ :center next-circle
+                  :radius $ :radius next-circle
+                  :line-style $ {} (:width 1) (:alpha 0.5)
+                    :color $ hslx 20 80 70
                 create-list :container ({})
                   -> (range parts)
                     map $ fn (idx)
@@ -71,6 +197,15 @@
                             * r1 $ sin
                               * (inc idx) e-angle0
                         noted "\"TODO recursion" $ group ({})
+                create-list :container ({})
+                  -> child-circles (take 2)
+                    map-indexed $ fn (idx child)
+                      [] idx $ circle
+                        {}
+                          :position $ :center child
+                          :radius $ :radius child
+                          :line-style $ {} (:width 1) (:alpha 0.5)
+                            :color $ hslx 20 80 70
         |comp-container $ quote
           defn comp-container (store)
             ; println "\"Store" store $ :tab store
@@ -80,22 +215,45 @@
                 parts $ noted "\"corners of each piece" 5
                 adjacent $ noted "\"put how many pieces togather" 5
                 r0 config/space-radius
-                e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
-              comp-circle-polygon parts adjacent config/space-radius ([] 0 0) ([] r0 0)
-                []
-                  * r0 $ cos e-angle0
-                  * r0 $ sin e-angle0
+                e-angle0 $ noted "\"in euclid coodinate"
+                  / (* 2 &PI) parts
+                r1 $ let
+                    a $ js/Math.tan
+                      - (* 0.5 &PI) (/ &PI adjacent)
+                    b $ js/Math.tan (/ &PI parts)
+                  * config/space-radius $ sqrt
+                    / (- a b) (+ a b)
+                p0 $ [] r1 0
+                p1 $ []
+                  * r1 $ cos e-angle0
+                  * r1 $ sin e-angle0
+                chord-info $ calculate-chord p0 p1
+                delta-angle $ call-wo-log +
+                  * 0.5 $ js/Math.abs
+                    - (:theta2 chord-info) (:theta1 chord-info)
+                  * 0.5 e-angle0
+              ; js/console.log chord-info delta-angle e-angle0
+              group ({})
+                circle $ {}
+                  :position $ [] 0 0
+                  :radius config/space-radius
+                  :line-style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 200 80 70
+                comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle
+        |square $ quote
+          defn square (x) (&* x x)
         |square-sum3 $ quote
           defn square-sum3 (a b c)
             + (* a a) (* b b) (* c c)
       :ns $ quote
         ns app.comp.container $ :require
-          phlox.core :refer $ g hslx rect circle text container graphics create-list >> group
+          phlox.core :refer $ g hslx rect circle text container graphics create-list >> group polyline
           phlox.comp.button :refer $ comp-button
           phlox.comp.drag-point :refer $ comp-drag-point
           respo-ui.core :as ui
           memof.alias :refer $ memof-call
           app.config :as config
+          phlox.complex :as complex
     |app.config $ {}
       :defs $ {}
         |site $ quote
@@ -121,7 +279,7 @@
             -> (new FontFaceObserver "\"Josefin Sans") (.!load)
               .!then $ fn (event) (render-app!)
             add-watch *store :change $ fn (store prev) (render-app!)
-            render-control!
+            when mobile? $ render-control!
             start-control-loop! 8 on-control-event
             println "\"App Started"
         |reload! $ quote
@@ -129,7 +287,7 @@
             do (clear-phlox-caches!) (remove-watch *store :change)
               add-watch *store :change $ fn (store prev) (render-app!)
               render-app!
-              replace-control-loop! 8 on-control-event
+              when mobile? $ replace-control-loop! 8 on-control-event
               hud! "\"ok~" "\"Ok"
             hud! "\"error" build-errors
         |render-app! $ quote
