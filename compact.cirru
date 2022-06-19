@@ -19,15 +19,13 @@
                 k1 $ -
                   * (- g a) cos-phi
                   * (- h b) sin-phi
-                k2 $ -
+                k2 $ +
                   * (- g a) sin-phi
                   * (- h b) cos-phi
                 t-r0-sub $ - (* r0 r0) (* g g) (* h h)
                 t-divide $ + (* 2 g k1) (* 2 h k2)
                 e $ + g
-                  /
-                    + $ * k1 t-r0-sub
-                    , t-divide
+                  / (* k1 t-r0-sub) t-divide
                 f $ + h
                   / (* k2 t-r0-sub) t-divide
                 mirrored $ calculate-mirrored center ([] e f) p1
@@ -54,16 +52,14 @@
                 t-c $ - (+ c e) (* 2 a)
                 g $ /
                   +
-                    * t-c $ - d b
-                      * c $ / k2 k1
-                    * a t-d
-                  - t-d $ * t-c (/ k2 k1)
+                    * t-c $ - (* d k1) (* b k1) (* c k2)
+                    * k1 a t-d
+                  - (* t-d k1) (* t-c k2)
                 h $ /
                   +
-                    * t-d $ - c a
-                      * d $ / k1 k2
-                    * b t-c
-                  - t-c $ * t-d (/ k1 k2)
+                    * t-d $ - (* c k2) (* a k2) (* d k1)
+                    * k2 b t-c
+                  - (* t-c k2) (* t-d k1)
               {}
                 :center $ [] g h
                 :radius $ js/Math.sqrt
@@ -143,14 +139,14 @@
                       :center $ [] cx cy
                       :radius r1
                       :radian $ wo-log ([] theta1 theta2)
-                      :anticlockwise? true
+                      :anticlockwise? false
         |comp-circle-polygon $ quote
-          defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle)
+          defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
             let
                 r1 radius
                 e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
                 next-chord $ calc-chord-from-circle-point center p1 delta-angle
-                next-circle $ calc-next-circle center p1 (:next next-chord) delta-angle
+                next-circle $ calc-next-circle center p1 (:next next-chord) e-angle0
                 child-circles $ loop
                     acc $ []
                     idx 0
@@ -159,7 +155,7 @@
                   identity $ if (>= idx parts) (wo-log acc)
                     let
                         next-chord $ calc-chord-from-circle-point center cursor-point delta-angle
-                        next-circle $ calc-next-circle center cursor-point (:next next-chord) delta-angle
+                        next-circle $ calc-next-circle center cursor-point (:next next-chord) e-angle0
                       recur
                         conj acc $ {} (:p1 cursor-point)
                           :p2 $ :next next-chord
@@ -168,22 +164,35 @@
                         inc idx
                         :next next-chord
               ; println next-chord next-circle
-              js/console.log "\"circles" child-circles
+              ; js/console.log "\"circles" child-circles
               container ({})
-                circle $ {} (:position center) (:radius radius)
+                ; circle $ {} (:position center) (:radius radius)
                   :line-style $ {} (:width 1) (:alpha 0.5)
                     :color $ hslx 20 80 70
+                ; polyline $ {}
+                  :style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 20 80 70
+                  :position $ [] 0 0
+                  :points $ wo-log
+                    [] ([] 0 0) (:chord-center next-chord) (:next next-chord) (; [] 100 100) (; :center next-circle)
                 polyline $ {}
                   :style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 20 80 70
                   :position $ [] 0 0
-                  :points $ [] ([] 0 0) (:chord-center next-chord) (:next next-chord) ([] 100 100) (:center next-circle)
+                  :points $ wo-log
+                    map child-circles $ fn (x) (:p1 x)
+                polyline $ {}
+                  :style $ {} (:width 1) (:alpha 1)
+                    :color $ hslx 20 80 70
+                  :position $ [] 0 0
+                  :points $ wo-log
+                    map child-circles $ fn (x) (:p2 x)
                 ; circle $ {}
                   :position $ :center next-circle
                   :radius $ :radius next-circle
                   :line-style $ {} (:width 1) (:alpha 0.5)
                     :color $ hslx 20 80 70
-                create-list :container ({})
+                ; create-list :container ({})
                   -> (range parts)
                     map $ fn (idx)
                       [] idx $ group ({})
@@ -198,14 +207,23 @@
                               * (inc idx) e-angle0
                         noted "\"TODO recursion" $ group ({})
                 create-list :container ({})
-                  -> child-circles (take 2)
-                    map-indexed $ fn (idx child)
-                      [] idx $ circle
-                        {}
-                          :position $ :center child
-                          :radius $ :radius child
-                          :line-style $ {} (:width 1) (:alpha 0.5)
-                            :color $ hslx 20 80 70
+                  -> child-circles
+                    ; take $ if (= 0 level) 1 5
+                    , wo-js-log $ map-indexed
+                      fn (idx child)
+                        [] idx $ group ({})
+                          ; circle $ {}
+                            :position $ :center child
+                            :radius $ :radius child
+                            :line-style $ {} (:width 1) (:alpha 0.5)
+                              :color $ hslx 20 80 70
+                          ; comp-chord-segment (:p1 child) (:p2 child)
+                          if
+                            and
+                              < (:radius child) radius
+                              < level 4
+                              > (:radius child) 10
+                            comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
         |comp-container $ quote
           defn comp-container (store)
             ; println "\"Store" store $ :tab store
@@ -239,7 +257,7 @@
                   :radius config/space-radius
                   :line-style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 200 80 70
-                comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle
+                comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
         |square $ quote
           defn square (x) (&* x x)
         |square-sum3 $ quote
