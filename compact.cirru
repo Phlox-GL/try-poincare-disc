@@ -141,18 +141,28 @@
                   :radius r1
                   :line-style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 0 80 30
-                graphics $ {}
-                  :ops $ [] (g :move-to p1)
-                    g :line-style $ {} (:width 2) (:alpha 1)
-                      :color $ hslx 200 80 70
-                    g :arc $ {}
-                      :center $ [] cx cy
-                      :radius r1
-                      :radian $ if
-                        and (< theta2 0) (> theta1 0)
-                        [] theta1 $ + theta2 (* 2 &PI)
-                        if (< theta2 theta1) ([] theta2 theta1) ([] theta1 theta2)
-                      :anticlockwise? false
+                if (> r1 2000)
+                  graphics $ {}
+                    :ops $ [] (g :move-to p1)
+                      g :line-style $ {} (:width 2) (:alpha 1)
+                        :color $ hslx 200 80 70
+                      g :line-to p2
+                  graphics $ {}
+                    :ops $ [] (; g :move-to p1)
+                      g :line-style $ {} (:width 2) (:alpha 1)
+                        :color $ hslx 200 80 70
+                      g :arc $ {}
+                        :center $ [] cx cy
+                        :radius r1
+                        :radian $ if
+                          and (< theta2 theta1)
+                            < (- theta1 theta2) (* 1 &PI)
+                          [] theta2 theta1
+                          if
+                            > (- theta2 theta1) &PI
+                            wo-log $ [] theta1 (+ 0.1 theta1)
+                            [] theta1 theta2
+                        :anticlockwise? false
                 ; polyline $ {}
                   :style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 20 80 70
@@ -239,8 +249,8 @@
                           if
                             and
                               < (:radius child) radius
-                              < level 2
-                              > (:radius child) 10
+                              < level 4
+                              > (:radius child) 2
                             comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
         |comp-container $ quote
           defn comp-container (store)
