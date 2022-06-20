@@ -6,6 +6,8 @@
   :files $ {}
     |app.comp.container $ {}
       :defs $ {}
+        |*rendered-centers $ quote
+          defatom *rendered-centers $ noted "\"track centers at delta of 4px" ([])
         |calc-chord-from-circle-point $ quote
           defn calc-chord-from-circle-point (center p1 theta)
             let-sugar
@@ -60,6 +62,8 @@
                     * t-d $ - (* c k2) (* a k2) (* d k1)
                     * k2 b t-c
                   - (* t-c k2) (* t-d k1)
+              ; if (js/isNaN g) (do js/debugger nil)
+              ; if (js/isNaN h) (do js/debugger nil)
               {}
                 :center $ [] g h
                 :radius $ js/Math.sqrt
@@ -246,12 +250,20 @@
                             :line-style $ {} (:width 1) (:alpha 0.5)
                               :color $ hslx 20 80 70
                           comp-chord-segment (:p1 child) (:p2 child)
-                          if
-                            and
-                              < (:radius child) radius
-                              < level 4
-                              > (:radius child) 2
-                            comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
+                          let
+                              caches @*rendered-centers
+                            if
+                              and
+                                < (:radius child) radius
+                                < level 5
+                                > (:radius child) 2
+                              if
+                                contains-center? caches $ :center child
+                                do (; js/console.log child)
+                                  group $ {}
+                                do
+                                  swap! *rendered-centers conj $ :center child
+                                  comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
         |comp-container $ quote
           defn comp-container (store)
             ; println "\"Store" store $ :tab store
@@ -278,6 +290,7 @@
                   * 0.5 $ js/Math.abs
                     - (:theta2 chord-info) (:theta1 chord-info)
                   * 0.5 e-angle0
+              reset! *rendered-centers $ []
               ; js/console.log chord-info delta-angle e-angle0
               group ({})
                 circle $ {}
@@ -286,6 +299,14 @@
                   :line-style $ {} (:width 1) (:alpha 1)
                     :color $ hslx 200 80 70
                 comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
+        |contains-center? $ quote
+          defn contains-center? (xs center)
+            any? xs $ fn (c)
+              and
+                > 2 $ js/Math.abs
+                  - (nth c 0) (nth center 0)
+                > 2 $ js/Math.abs
+                  - (nth c 1) (nth center 1)
         |square $ quote
           defn square (x) (&* x x)
         |square-sum3 $ quote
