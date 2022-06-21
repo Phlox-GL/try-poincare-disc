@@ -184,7 +184,7 @@
                     idx 0
                     cursor-point p1
                   ; println acc idx cursor-point
-                  identity $ if (>= idx parts) (wo-log acc)
+                  if (>= idx parts) (wo-log acc)
                     let
                         next-chord $ calc-chord-from-circle-point center cursor-point delta-angle
                         next-circle $ calc-next-circle center cursor-point (:next next-chord) e-angle0

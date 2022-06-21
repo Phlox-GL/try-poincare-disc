@@ -1,7 +1,7 @@
 {
   "version": "0.4.10",
   "dependencies": {
-    "@calcit/procs": "^0.5.45",
+    "@calcit/procs": "^0.5.46",
     "@quamolit/phlox-utils": "^0.0.2",
     "@quamolit/touch-control": "^0.0.8",
     "bottom-tip": "^0.1.3",
