@@ -176,7 +176,8 @@
           defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
             let
                 r1 radius
-                e-angle0 $ noted "\"in euclid coodinate" (* 2 &PI 0.2)
+                e-angle0 $ noted "\"in euclid coodinate"
+                  / (* 2 &PI) adjacent
                 next-chord $ calc-chord-from-circle-point center p1 delta-angle
                 next-circle $ calc-next-circle center p1 (:next next-chord) e-angle0
                 child-circles $ loop
@@ -255,7 +256,7 @@
                             if
                               and
                                 < (:radius child) radius
-                                < level 5
+                                < level config/branch-level
                                 > (:radius child) 2
                               if
                                 contains-center? caches $ :center child
@@ -270,8 +271,8 @@
             let
                 cursor $ []
                 states $ :states store
-                parts $ noted "\"corners of each piece" 5
-                adjacent $ noted "\"put how many pieces togather" 5
+                parts config/parts
+                adjacent config/adjacent-size
                 r0 config/space-radius
                 e-angle0 $ noted "\"in euclid coodinate"
                   / (* 2 &PI) parts
@@ -323,6 +324,14 @@
           phlox.complex :as complex
     |app.config $ {}
       :defs $ {}
+        |adjacent-size $ quote
+          def adjacent-size $ noted "\"put how many pieces togather"
+            js/parseInt $ get-env "\"adjacent" "\"5"
+        |branch-level $ quote
+          def branch-level $ js/parseInt (get-env "\"level" "\"5")
+        |parts $ quote
+          def parts $ noted "\"corners of each piece"
+            js/parseInt $ get-env "\"parts" "\"5"
         |site $ quote
           def site $ {} (:dev-ui "\"http://localhost:8100/main.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main.css") (:cdn-url "\"http://cdn.tiye.me/phlox/") (:title "\"Phlox") (:icon "\"http://cdn.tiye.me/logo/quamolit.png") (:storage-key "\"phlox")
         |space-radius $ quote (def space-radius 400)
