@@ -127,6 +127,11 @@
               complex/minus
                 complex/times footer $ [] 2 0
                 , p0
+        |check-radian-angle $ quote
+          defn check-radian-angle (a) (; "\"in case angle too large caused by negative radian used")
+            if (> a &PI)
+              - (* 2 &PI) a
+              , a
         |comp-chord-segment $ quote
           defn comp-chord-segment (p1 p2) (; println p1 p2)
             let
@@ -287,9 +292,9 @@
                   * r1 $ cos e-angle0
                   * r1 $ sin e-angle0
                 chord-info $ calculate-chord p0 p1
-                delta-angle $ call-wo-log +
+                delta-angle $ +
                   * 0.5 $ js/Math.abs
-                    - (:theta2 chord-info) (:theta1 chord-info)
+                    check-radian-angle $ - (:theta2 chord-info) (:theta1 chord-info)
                   * 0.5 e-angle0
               reset! *rendered-centers $ []
               ; js/console.log chord-info delta-angle e-angle0
@@ -360,7 +365,7 @@
             println "\"App Started"
         |reload! $ quote
           defn reload! () $ if (nil? build-errors)
-            do (clear-phlox-caches!) (remove-watch *store :change)
+            do (clear-phlox-caches!) (remove-watch *store :change) (js/console.clear)
               add-watch *store :change $ fn (store prev) (render-app!)
               render-app!
               when mobile? $ replace-control-loop! 8 on-control-event
