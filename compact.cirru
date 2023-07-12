@@ -346,14 +346,14 @@
       :defs $ {}
         |*store $ quote (defatom *store schema/store)
         |dispatch! $ quote
-          defn dispatch! (op op-data)
+          defn dispatch! (op)
             when
-              and dev? $ not= op :states
-              println "\"dispatch!" op op-data
+              and dev? $ not= (nth op 0) :states
+              js/console.log "\"dispatch!" op
             let
                 op-id $ nanoid
                 op-time $ js/Date.now
-              reset! *store $ updater @*store op op-data op-id op-time
+              reset! *store $ updater @*store op op-id op-time
         |main! $ quote
           defn main! () (; js/console.log PIXI)
             if dev? $ load-console-formatter!
@@ -396,17 +396,17 @@
     |app.updater $ {}
       :defs $ {}
         |updater $ quote
-          defn updater (store op op-data op-id op-time)
-            case-default op
-              do (println "\"unknown op" op op-data) store
-              :add-x $ update store :x
-                fn (x)
+          defn updater (store op op-id op-time)
+            tag-match op
+                :add-x
+                update store :x $ fn (x)
                   if (> x 10) 0 $ + x 1
-              :tab $ assoc store :tab op-data
-              :toggle-keyboard $ update store :keyboard-on? not
-              :counted $ update store :counted inc
-              :states $ update-states store op-data
-              :hydrate-storage op-data
+              (:tab t) (assoc store :tab t)
+              (:toggle-keyboard) (update store :keyboard-on? not)
+              (:counted) (update store :counted inc)
+              (:states cursor s) (update-states store cursor s)
+              (:hydrate-storage d) d
+              _ $ do (eprintln "\"unknown op" op) store
       :ns $ quote
         ns app.updater $ :require
           [] phlox.cursor :refer $ [] update-states
