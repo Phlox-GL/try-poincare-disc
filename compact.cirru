@@ -150,40 +150,44 @@
                   r1 $ :radius info
                   theta1 $ :theta1 info
                   theta2 $ :theta2 info
-                ; js/console.log info
-                group ({})
-                  ; circle $ {}
-                    :position $ [] cx cy
+                if (> r1 2)
+                  swap! config/*shapes-collection conj $ {}
+                    :center $ [] cx cy
                     :radius r1
-                    :line-style $ {} (:width 1) (:alpha 1)
-                      :color $ hslx 0 80 30
-                  if (> r1 2000)
-                    graphics $ {}
-                      :ops $ [] (g :move-to p1)
-                        g :line-style $ {} (:width 2) (:alpha 1)
-                          :color $ hslx 200 80 70
-                        g :line-to p2
-                    graphics $ {}
-                      :ops $ [] (; g :move-to p1)
-                        g :line-style $ {} (:width 2) (:alpha 1)
-                          :color $ hslx 200 80 70
-                        g :arc $ {}
-                          :center $ [] cx cy
-                          :radius r1
-                          :radian $ if
-                            and (< theta2 theta1)
-                              < (- theta1 theta2) (* 1 &PI)
-                            [] theta2 theta1
-                            if
-                              > (- theta2 theta1) &PI
-                              wo-log $ [] theta1 (+ 0.1 theta1)
-                              [] theta1 theta2
-                          :anticlockwise? false
-                  ; polyline $ {}
-                    :style $ {} (:width 1) (:alpha 1)
-                      :color $ hslx 20 80 70
-                    :position $ [] 0 0
-                    :points $ [] p1 p2
+                if (> r1 2)
+                  group ({})
+                    ; circle $ {}
+                      :position $ [] cx cy
+                      :radius r1
+                      :line-style $ {} (:width 1) (:alpha 1)
+                        :color $ hslx 0 80 30
+                    if (> r1 2000)
+                      ;nil graphics $ {}
+                        :ops $ [] (g :move-to p1)
+                          g :line-style $ {} (:width 2) (:alpha 1)
+                            :color $ hslx 200 80 70
+                          g :line-to p2
+                      graphics $ {}
+                        :ops $ [] (; g :move-to p1)
+                          g :line-style $ {} (:width 2) (:alpha 1)
+                            :color $ hslx 200 80 70
+                          g :arc $ {}
+                            :center $ [] cx cy
+                            :radius r1
+                            :radian $ if
+                              and (< theta2 theta1)
+                                < (- theta1 theta2) (* 1 &PI)
+                              [] theta2 theta1
+                              if
+                                > (- theta2 theta1) &PI
+                                wo-log $ [] theta1 (+ 0.1 theta1)
+                                [] theta1 theta2
+                            :anticlockwise? false
+                    ; polyline $ {}
+                      :style $ {} (:width 1) (:alpha 1)
+                        :color $ hslx 20 80 70
+                      :position $ [] 0 0
+                      :points $ [] p1 p2
         |comp-circle-polygon $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
@@ -198,7 +202,11 @@
                       idx 0
                       cursor-point p1
                     ; println acc idx cursor-point
-                    if (>= idx parts) (wo-log acc)
+                    if
+                      or (>= idx parts)
+                        and (> level 0)
+                          >= idx $ dec parts
+                      wo-log acc
                       let
                           next-chord $ calc-chord-from-circle-point center cursor-point delta-angle
                           next-circle $ calc-next-circle center cursor-point (:next next-chord) e-angle0
@@ -211,7 +219,7 @@
                           :next next-chord
                 ; println next-chord next-circle
                 ; js/console.log "\"circles" child-circles
-                swap! config/*shapes-collection conj next-circle
+                ; swap! config/*shapes-collection conj next-circle
                 container ({})
                   ; circle $ {} (:position center) (:radius radius)
                     :line-style $ {} (:width 1) (:alpha 0.5)
@@ -257,7 +265,7 @@
                     -> child-circles
                       ; take $ if (= 0 level) 1 5
                       , wo-js-log $ map-indexed
-                        fn (idx child)
+                        fn (idx child) (; swap! config/*shapes-collection conj next-circle)
                           [] idx $ group ({})
                             ; circle $ {}
                               :position $ :center child
@@ -277,7 +285,7 @@
                                   do (; js/console.log child)
                                     group $ {}
                                   do
-                                    swap! *rendered-centers conj $ :center child
+                                    ; swap! *rendered-centers conj $ :center child
                                     comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
         |comp-container $ %{} :CodeEntry (:doc |)
           :code $ quote
