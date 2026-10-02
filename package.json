@@ -10,14 +10,14 @@
     "pixi.js": "7.x"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5",
     "mobile-detect": "^1.4.5",
     "vite": "^8.3.1"
   },
   "packageManager": "yarn@4.18.0",
   "scripts": {
-    "compile": "calcit calcit.cirru js",
+    "compile": "calcit",
+    "watch": "calcit -w",
     "build": "yarn compile && vite build",
-    "dev": "yarn compile && concurrently --kill-others \"calcit calcit.cirru js -w\" \"vite\""
+    "dev": "yarn compile && vite"
   }
 }
