@@ -139,6 +139,9 @@
           :schema $ :: 'Fn $ {}
             :args $ [] (:: 'List 'Number) (:: 'List 'Number) (:: 'List 'Number)
             :return $ :: 'List 'Number
+          :tests $ [] $ %{} 'TestEntry (:name |reflects-across-horizontal-geodesic)
+            :code $ quote $ assert= ([] 1 -3)
+              calculate-mirrored ([] 0 0) ([] 2 0) ([] 1 3)
         'check-radian-angle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn check-radian-angle (a)
             ; "|in case angle too large caused by negative radian used"
@@ -370,10 +373,10 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
-            [] phlox.core :refer $ [] g hslx circle container graphics create-list group
-            [] app.config :as config
-            [] app.schema :as schema
-            [] phlox.complex :as complex
+            phlox.core :refer $ g hslx circle container graphics create-list group
+            app.config :as config
+            app.schema :as schema
+            phlox.complex :as complex
     'app.config $ %{} 'FileEntry
       :defs $ {}
         '*shapes-collection $ %{} 'CodeEntry (:doc |)
@@ -432,6 +435,7 @@
               reset! *store $ updater @*store op
                 decode-map-as (nanoid) 'String
                 decode-map-as (js/Date.now) 'Number
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Enum
@@ -440,7 +444,7 @@
           :code $ quote $ defn main! () (; js/console.log PIXI)
             if dev? $ load-console-formatter!
             whenFontsReady $ fn () $ render-app!
-            add-watch *store :change $ fn (store prev) (render-app!)
+            add-watch! *store :change $ fn (store prev) (render-app!)
             when mobile? $ render-control!
             start-control-loop! 8 on-control-event
             println "|App Started"
@@ -451,12 +455,13 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (js-nullish? build-errors)
-              do (clear-phlox-caches!) (remove-watch *store :change) (; js/console.clear)
-                add-watch *store :change $ fn (store prev) (render-app!)
+              do (clear-phlox-caches!) (remove-watch! *store :change) (; js/console.clear)
+                add-watch! *store :change $ fn (store prev) (render-app!)
                 render-app!
                 when mobile? $ replace-control-loop! 8 on-control-event
                 hud! |ok~ |Ok
               hud! |error build-errors
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -465,7 +470,7 @@
           :code $ quote $ defn render-app! ()
             reset! *shapes-collection $ []
             render! (comp-container @*store) dispatch! $ {}
-            println $ to-js-data @*shapes-collection
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -473,17 +478,17 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
-            [] phlox.core :refer $ [] render! clear-phlox-caches! on-control-event
-            [] app.comp.container :refer $ [] comp-container
-            [] app.schema :as schema
-            [] phlox.config :refer $ [] dev? mobile?
-            [] |nanoid :refer $ [] nanoid
-            [] app.updater :refer $ [] updater
-            [] |../assets/fonts.mjs :refer $ [] whenFontsReady
-            [] |./calcit.build-errors :default build-errors
-            [] |bottom-tip :default hud!
-            [] touch-control.core :refer $ [] render-control! start-control-loop! replace-control-loop!
-            [] app.config :refer $ [] *shapes-collection
+            phlox.core :refer $ render! clear-phlox-caches! on-control-event
+            app.comp.container :refer $ comp-container
+            app.schema :as schema
+            phlox.config :refer $ dev? mobile?
+            |nanoid :refer $ nanoid
+            app.updater :refer $ updater
+            |../assets/fonts.mjs :refer $ whenFontsReady
+            |./calcit.build-errors :default build-errors
+            |bottom-tip :default hud!
+            touch-control.core :refer $ render-control! start-control-loop! replace-control-loop!
+            app.config :refer $ *shapes-collection
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'ChildCircle $ %{} 'CodeEntry (:doc |)
@@ -575,4 +580,4 @@
             :return $ :: 'Map 'Tag 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
-          :require $ [] phlox.cursor :refer $ [] update-states
+          :require $ phlox.cursor :refer $ update-states
