@@ -35,7 +35,7 @@ jobs:
       - name: Install immutable dependencies
         run: |
           set -euo pipefail
-          caps --ci
+          caps --strict --ci
           yarn install --immutable
           caps verify --toolchain
       - name: Check canonical Calcit and types
@@ -47,8 +47,10 @@ jobs:
           test ! -e package.cirru
           calcit edit format
           git diff --exit-code -- calcit.cirru
-          calcit --check-only
-          calcit analyze check-public --ns app.comp.container --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only --format json
+          calcit --check-only --all-defs
+          calcit fix --workflow strict --verify
+          calcit test app.comp.container/calculate-mirrored --require-match
+          calcit --check-only --ns app.comp.container --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only --format json
       - name: Select frontend CDN path
         id: asset-path
         env:
