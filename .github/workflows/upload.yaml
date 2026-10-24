@@ -48,7 +48,10 @@ jobs:
           test ! -e compact.cirru
           test ! -e package.cirru
           calcit edit format
-          git diff --exit-code -- calcit.cirru
+          if ! git diff --quiet --exit-code -- calcit.cirru; then
+            echo "::error::Snapshot is not canonical; format it with the matching Calcit version."
+            exit 1
+          fi
           calcit --check-only --all-defs --format json
           calcit fix --workflow strict --verify --format json | jq -e '{workflow:.data.workflow,diagnostics:.diagnostics} | ., (.workflow.status == "passed" and .diagnostics == [])'
           calcit test app.comp.container/calculate-mirrored --require-match
