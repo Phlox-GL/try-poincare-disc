@@ -47,7 +47,7 @@ jobs:
           test -f deps.cirru
           test ! -e compact.cirru
           test ! -e package.cirru
-          calcit edit format --quiet
+          calcit edit format
           if ! git diff --quiet --exit-code -- calcit.cirru; then
             echo "::error::Snapshot is not canonical; format it with the matching Calcit version."
             exit 1

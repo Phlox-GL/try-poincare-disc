@@ -28,7 +28,7 @@ CI checks canonical formatting, strict entry points and public contracts, then
 builds with the configured CDN base. Only main uploads frontend assets to
 `https://cos-sh.tiye.me/Phlox-GL/try-poincare-disc/`; COS action v1.2.0
 verifies the public files internally. Server sync retains its original path.
-格式检查使用 quiet 模式，并由原 git diff 门禁阻断非 canonical Snapshot；不打印整个 Snapshot。
+格式检查使用原命令，git diff 使用 quiet 模式阻断非 canonical Snapshot；不打印整个 Snapshot。
 
 上传排队、不取消；生产发布前检查当前 main，过期构建同时跳过 COS 和服务器同步。
 PR 仍只检查与构建，不读取部署 secrets，不添加项目校验脚本。
