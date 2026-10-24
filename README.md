@@ -11,7 +11,10 @@ Based on tutorial http://www.malinc.se/noneuclidean/en/poincaretiling.php
 
 https://github.com/Phlox-GL/phlox-workflow
 
-使用者影响：当前配对正式 Calcit/procs 0.30.1、Phlox 0.7.16、Touch Control 0.0.32。
+使用者影响：当前配对正式 Calcit/procs 0.30.1、Phlox 0.7.18、Touch Control 0.0.33。
+升级后重新执行严格依赖解析和不可变安装，使用已发布的 JS FFI 0.2.6 / Pointed Prompt 0.0.21
+传递依赖，不混用旧模块缓存。本轮不改应用源码、类型、几何公式、数字游标或字体适配器。
+Phlox #71 的 IAB 静态文字可见性风险仍保留，不能将依赖升级视作该问题已修复。
 几何公式、递归深度、圆心去重、状态和 `hud!` 页面成功/错误提示保持不变；源码已使用公开 Option 方法，不重复改写。
 Pixi 在同主版本内由旧 lock 的 7.4.2 固定到精确正式 7.4.3，不切换 Pixi8。
 
@@ -25,6 +28,7 @@ CI checks canonical formatting, strict entry points and public contracts, then
 builds with the configured CDN base. Only main uploads frontend assets to
 `https://cos-sh.tiye.me/Phlox-GL/try-poincare-disc/`; COS action v1.2.0
 verifies the public files internally. Server sync retains its original path.
+格式检查使用 quiet 模式，并由原 git diff 门禁阻断非 canonical Snapshot；不打印整个 Snapshot。
 
 上传排队、不取消；生产发布前检查当前 main，过期构建同时跳过 COS 和服务器同步。
 PR 仍只检查与构建，不读取部署 secrets，不添加项目校验脚本。
