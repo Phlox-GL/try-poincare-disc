@@ -18,6 +18,8 @@ Phlox #71 的 IAB 静态文字可见性风险仍保留，不能将依赖升级�
 几何公式、递归深度、圆心去重、状态和 `hud!` 页面成功/错误提示保持不变；源码已使用公开 Option 方法，不重复改写。
 Pixi 在同主版本内由旧 lock 的 7.4.2 固定到精确正式 7.4.3，不切换 Pixi8。
 
+后续源码清理仅将三个命名状态的 `defatom` 改为首选 `defref`：圆心去重缓存、图形列表与页面 store 的名称、初始化值及类型不变，不改 watcher、几何算法或 HUD。官方 Linux 0.30.1 准备 CI 中，迁移前后全部生成 JS 的逐文件哈希一致，原镜像几何回归、完整 strict 和公开定义检查通过；这不替代实际浏览器热重载或交互验收。最终不增加测试、校验脚本或工作流。
+
 Use Node.js 24 and Yarn 4.18.0. Use `calcit.cirru`
 and `deps.cirru`; the retired `compact.cirru`/`package.cirru` are ignored.
 Run `caps --strict --ci`, `yarn install --immutable`, `caps verify --toolchain`, then `yarn dev` or `yarn build`.
