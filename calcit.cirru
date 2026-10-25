@@ -11,7 +11,7 @@
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
         '*rendered-centers $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *rendered-centers
+          :code $ quote $ defref *rendered-centers
             noted "|track centers at delta of 4px" $ []
           :examples $ []
           :schema $ :: 'Ref $ :: 'List (:: 'List 'Number)
@@ -380,7 +380,7 @@
     'app.config $ %{} 'FileEntry
       :defs $ {}
         '*shapes-collection $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *shapes-collection ([])
+          :code $ quote $ defref *shapes-collection ([])
           :examples $ []
           :schema $ :: 'Ref $ :: 'List 'app.schema/Circle
         'adjacent-size $ %{} 'CodeEntry (:doc "|put how many pieces together")
@@ -422,7 +422,7 @@
     'app.main $ %{} 'FileEntry
       :defs $ {}
         '*store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *store schema/store
+          :code $ quote $ defref *store schema/store
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
