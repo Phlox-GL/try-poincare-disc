@@ -1,0 +1,74 @@
+name: Protected Poincare Ref migration
+on:
+  push:
+    branches: [prepare/poincare-ref-0301]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          deps-file: deps.cirru
+          tools: calcit,caps
+          caps-version: "0.1.1"
+      - name: Original immutable dependencies and pre-migration JS
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          caps --strict --ci
+          yarn install --immutable
+          caps verify --toolchain
+          test "$(calcit -v)" = 0.30.1
+          mkdir -p acceptance
+          VITE_BASE_URL=./ yarn build
+          find js-out -type f -print0 | sort -z | xargs -0 sha256sum > acceptance/before-js.sha256
+      - name: Exact guarded source transaction and original gates
+        run: |
+          set -euo pipefail
+          node prepare-ref.mjs apply
+          test ! -e compact.cirru
+          test ! -e package.cirru
+          before_blob="$(git hash-object calcit.cirru)"
+          calcit edit format
+          test "$(git hash-object calcit.cirru)" = "$before_blob"
+          calcit --check-only --all-defs --format json > acceptance/all-defs.json
+          calcit fix --workflow strict --verify --format json > acceptance/strict.json
+          jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/strict.json
+          calcit test app.comp.container/calculate-mirrored --require-match --format json > acceptance/original-test.json
+          calcit --check-only --ns app.comp.container --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only --format json > acceptance/public.json
+          VITE_BASE_URL=./ yarn build
+          find js-out -type f -print0 | sort -z | xargs -0 sha256sum > acceptance/after-js.sha256
+          cmp acceptance/before-js.sha256 acceptance/after-js.sha256
+          node prepare-ref.mjs verify
+      - uses: actions/upload-artifact@v7.0.2
+        if: success()
+        with:
+          name: accepted-source
+          path: calcit.cirru
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v7.0.2
+        if: success()
+        with:
+          name: frontend
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: diagnostics
+          path: acceptance/
+          if-no-files-found: warn
+          retention-days: 30
