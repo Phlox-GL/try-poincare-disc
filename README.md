@@ -7,6 +7,20 @@
 
 Based on tutorial http://www.malinc.se/noneuclidean/en/poincaretiling.php
 
+### 本轮 0.31.0 迁移
+
+使用者注意：CLI/procs 精确配对正式 0.31.0，Phlox 使用已发布 0.8.0-alpha.3，
+Touch Control 0.0.34（传递 JS FFI 0.2.7 / Pointed Prompt 0.0.23）。重新安装并构建。
+四处已删除的 `let-sugar` 改为按原顺序的 `let` / `let[]`；四处有效 `wo-log`
+调用改为其参数或删除管道中的恒等步骤。保留几何公式、求值顺序、类型、原镜像测试、
+递归深度、圆心去重和 HUD。三处注释内的旧 `wo-log` 不执行，保留作历史注释。
+
+本地 229 个定义、34 个公开定义、完整 strict（无 diagnostics）、原镜像测试、
+canonical、immutable、4 模块配对和前端构建通过。实际 IAB 初次加载能绘制完整递归圆盘，
+刷新后截图出现大片线条缺失，console 无 error/warn；关联 Phlox #71，根因未确认。
+因此不宣称刷新视觉验收通过；HMR、移动端与其他浏览器本轮未重验，保留 Draft。
+以下 0.30.1 内容为历史迁移记录，不替代本轮验收结果。
+
 ### Workflow
 
 https://github.com/Phlox-GL/phlox-workflow
