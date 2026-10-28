@@ -24,117 +24,131 @@
             :features $ #{} :js-ffi
         'calc-chord-from-circle-point $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calc-chord-from-circle-point (center p1 theta)
-            let-sugar
-                  [] a b
-                  , center
-                ([] g h) p1
+            let[] (a b) center $ let[] (g h) p1 $ let
                 r0 config/space-radius
-                phi $ negate theta
-                cos-phi $ cos phi
-                sin-phi $ sin phi
-                k1 $ -
-                  * (- g a) cos-phi
-                  * (- h b) sin-phi
-                k2 $ +
-                  * (- g a) sin-phi
-                  * (- h b) cos-phi
-                t-r0-sub $ - (* r0 r0) (* g g) (* h h)
-                t-divide $ + (* 2 g k1) (* 2 h k2)
-                e $ + g $ / (* k1 t-r0-sub) t-divide
-                f $ + h $ / (* k2 t-r0-sub) t-divide
-                mirrored $ calculate-mirrored center ([] e f) p1
-              schema/NextChord :chord-center ([] e f) :next mirrored
+              let
+                  phi $ negate theta
+                let
+                    cos-phi $ cos phi
+                  let
+                      sin-phi $ sin phi
+                    let
+                        k1 $ -
+                          * (- g a) cos-phi
+                          * (- h b) sin-phi
+                      let
+                          k2 $ +
+                            * (- g a) sin-phi
+                            * (- h b) cos-phi
+                        let
+                            t-r0-sub $ - (* r0 r0) (* g g) (* h h)
+                          let
+                              t-divide $ + (* 2 g k1) (* 2 h k2)
+                            let
+                                e $ + g $ / (* k1 t-r0-sub) t-divide
+                              let
+                                  f $ + h $ / (* k2 t-r0-sub) t-divide
+                                let
+                                    mirrored $ calculate-mirrored center ([] e f) p1
+                                  schema/NextChord :chord-center ([] e f) :next mirrored
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/NextChord)
             :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number
         'calc-next-circle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calc-next-circle (center p1 p2 theta)
-            let-sugar
-                  [] a b
-                  , center
-                ([] c d) p1
-                ([] e f) p2
-                phi theta
-                cos-phi $ cos phi
-                sin-phi $ sin phi
-                k1 $ -
-                  * cos-phi $ - c a
-                  * sin-phi $ - d b
-                k2 $ +
-                  * cos-phi $ - d b
-                  * sin-phi $ - c a
-                t-d $ - (+ d f) (* 2 b)
-                t-c $ - (+ c e) (* 2 a)
-                g $ /
-                  +
-                    * t-c $ - (* d k1) (* b k1) (* c k2)
-                    * k1 a t-d
-                  - (* t-d k1) (* t-c k2)
-                h $ /
-                  +
-                    * t-d $ - (* c k2) (* a k2) (* d k1)
-                    * k2 b t-c
-                  - (* t-c k2) (* t-d k1)
-              ; if (js/isNaN g) (do js/debugger nil)
-              ; if (js/isNaN h) (do js/debugger nil)
-              schema/Circle :center ([] g h) :radius $ sqrt $ +
-                square $ - g c
-                square $ - h d
+            let[] (a b) center $ let[] (c d) p1 $ let[] (e f) p2
+              let
+                  phi theta
+                let
+                    cos-phi $ cos phi
+                  let
+                      sin-phi $ sin phi
+                    let
+                        k1 $ -
+                          * cos-phi $ - c a
+                          * sin-phi $ - d b
+                      let
+                          k2 $ +
+                            * cos-phi $ - d b
+                            * sin-phi $ - c a
+                        let
+                            t-d $ - (+ d f) (* 2 b)
+                          let
+                              t-c $ - (+ c e) (* 2 a)
+                            let
+                                g $ /
+                                  +
+                                    * t-c $ - (* d k1) (* b k1) (* c k2)
+                                    * k1 a t-d
+                                  - (* t-d k1) (* t-c k2)
+                              let
+                                  h $ /
+                                    +
+                                      * t-d $ - (* c k2) (* a k2) (* d k1)
+                                      * k2 b t-c
+                                    - (* t-c k2) (* t-d k1)
+                                ; if (js/isNaN g) (do js/debugger nil)
+                                ; if (js/isNaN h) (do js/debugger nil)
+                                schema/Circle :center ([] g h) :radius $ sqrt $ +
+                                  square $ - g c
+                                  square $ - h d
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Circle)
             :args $ [] (:: 'List 'Number) (:: 'List 'Number) (:: 'List 'Number) 'Number
         'calculate-chord $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-chord (p1 p2)
-            let-sugar
+            let
                 r config/space-radius
-                ([] a b) p1
-                ([] c d) p2
-                s3 $ square-sum3 a b r
-                cx $ /
-                  +
-                    * b (+ a c) (- a c)
-                    * b (+ b d) (- b d)
-                    negate $ * s3 $ - b d
-                  , 2 $ -
-                    * b $ - a c
-                    * a $ - b d
-                cy $ /
-                  +
-                    * a (+ a c) (- a c)
-                    * a (+ b d) (- b d)
-                    negate $ * s3 $ - a c
-                  , 2 $ -
-                    * a $ - b d
-                    * b $ - a c
-                r1 $ sqrt $ -
-                  + (* cx cx) (* cy cy)
-                  * r r
-                theta1 $ atan2 (- b cy) (- a cx)
-                theta2 $ atan2 (- d cy) (- c cx)
-              schema/ChordInfo :center ([] cx cy) :radius r1 :theta1 theta1 :theta2 theta2
+              let[] (a b) p1 $ let[] (c d) p2 $ let
+                  s3 $ square-sum3 a b r
+                let
+                    cx $ /
+                      +
+                        * b (+ a c) (- a c)
+                        * b (+ b d) (- b d)
+                        negate $ * s3 $ - b d
+                      , 2 $ -
+                        * b $ - a c
+                        * a $ - b d
+                  let
+                      cy $ /
+                        +
+                          * a (+ a c) (- a c)
+                          * a (+ b d) (- b d)
+                          negate $ * s3 $ - a c
+                        , 2 $ -
+                          * a $ - b d
+                          * b $ - a c
+                    let
+                        r1 $ sqrt $ -
+                          + (* cx cx) (* cy cy)
+                          * r r
+                      let
+                          theta1 $ atan2 (- b cy) (- a cx)
+                        let
+                            theta2 $ atan2 (- d cy) (- c cx)
+                          schema/ChordInfo :center ([] cx cy) :radius r1 :theta1 theta1 :theta2 theta2
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/ChordInfo)
             :args $ [] (:: 'List 'Number) (:: 'List 'Number)
         'calculate-mirrored $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-mirrored (p1 p2 p0)
-            let-sugar
-                  [] a b
-                  , p1
-                ([] c d) p2
-                ([] e f) p0
-                k $ negate $ /
-                  +
-                    * (- a e) (- c a)
-                    * (- b f) (- d b)
-                  +
-                    square $ - a c
-                    square $ - b d
-                footer $ []
-                  + a $ * (wo-log k) (- c a)
-                  + b $ * k $ - d b
-              complex/minus
-                complex/times footer $ [] 2 0
-                , p0
+            let[] (a b) p1 $ let[] (c d) p2 $ let[] (e f) p0
+              let
+                  k $ negate $ /
+                    +
+                      * (- a e) (- c a)
+                      * (- b f) (- d b)
+                    +
+                      square $ - a c
+                      square $ - b d
+                let
+                    footer $ []
+                      + a $ * k $ - c a
+                      + b $ * k $ - d b
+                  complex/minus
+                    complex/times footer $ [] 2 0
+                    , p0
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] (:: 'List 'Number) (:: 'List 'Number) (:: 'List 'Number)
@@ -190,7 +204,7 @@
                             [] theta2 theta1
                             if
                               > (- theta2 theta1) &PI
-                              wo-log $ [] theta1 $ + 0.1 theta1
+                              [] theta1 $ + 0.1 theta1
                               [] theta1 theta2
                           :anticlockwise? false
                   ; polyline $ {}
@@ -223,8 +237,7 @@
                       or (>= idx parts)
                         and (> level 0)
                           >= idx $ dec parts
-                      wo-log acc
-                      let
+                      , acc $ let
                           next-chord $ calc-chord-from-circle-point center cursor-point delta-angle
                           next-circle $ calc-next-circle center cursor-point (:next next-chord) e-angle0
                         recur
@@ -276,7 +289,7 @@
                 create-list :container ({})
                   -> child-circles
                     ; take $ if (= 0 level) 1 5
-                    , wo-log $ map-indexed $ fn (idx child) (; swap! config/*shapes-collection conj next-circle)
+                    map-indexed $ fn (idx child) (; swap! config/*shapes-collection conj next-circle)
                       [] idx $ group ({})
                         ; circle $ {}
                           :position $ :center child
