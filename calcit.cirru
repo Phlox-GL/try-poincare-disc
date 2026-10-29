@@ -14,14 +14,13 @@
           :code $ quote $ defref *rendered-centers
             noted "|track centers at delta of 4px" $ []
           :examples $ []
-          :schema $ :: 'Ref $ :: 'List (:: 'List 'Number)
+          :schema $ quote $ Ref
+            List $ List Number
         'atan2 $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn atan2 (y x)
             decode-map-as (js/Math.atan2 y x) 'Number
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'Number 'Number
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Number Number (-> Number) (:features :js-ffi)
         'calc-chord-from-circle-point $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calc-chord-from-circle-point (center p1 theta)
             let[] (a b) center $ let[] (g h) p1 $ let
@@ -52,8 +51,7 @@
                                     mirrored $ calculate-mirrored center ([] e f) p1
                                   schema/NextChord :chord-center ([] e f) :next mirrored
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/NextChord)
-            :args $ [] (:: 'List 'Number) (:: 'List 'Number) 'Number
+          :schema $ quote $ Fn (List Number) (List Number) Number (-> app.schema/NextChord)
         'calc-next-circle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calc-next-circle (center p1 p2 theta)
             let[] (a b) center $ let[] (c d) p1 $ let[] (e f) p2
@@ -93,8 +91,7 @@
                                   square $ - g c
                                   square $ - h d
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Circle)
-            :args $ [] (:: 'List 'Number) (:: 'List 'Number) (:: 'List 'Number) 'Number
+          :schema $ quote $ Fn (List Number) (List Number) (List Number) Number (-> app.schema/Circle)
         'calculate-chord $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-chord (p1 p2)
             let
@@ -129,8 +126,7 @@
                             theta2 $ atan2 (- d cy) (- c cx)
                           schema/ChordInfo :center ([] cx cy) :radius r1 :theta1 theta1 :theta2 theta2
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/ChordInfo)
-            :args $ [] (:: 'List 'Number) (:: 'List 'Number)
+          :schema $ quote $ Fn (List Number) (List Number) (-> app.schema/ChordInfo)
         'calculate-mirrored $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-mirrored (p1 p2 p0)
             let[] (a b) p1 $ let[] (c d) p2 $ let[] (e f) p0
@@ -150,9 +146,8 @@
                     complex/times footer $ [] 2 0
                     , p0
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] (:: 'List 'Number) (:: 'List 'Number) (:: 'List 'Number)
-            :return $ :: 'List 'Number
+          :schema $ quote $ Fn (List Number) (List Number) (List Number)
+            -> $ List Number
           :tests $ [] $ %{} 'TestEntry (:name |reflects-across-horizontal-geodesic)
             :code $ quote $ assert= ([] 1 -3)
               calculate-mirrored ([] 0 0) ([] 2 0) ([] 1 3)
@@ -163,8 +158,7 @@
               - (* 2 &PI) a
               , a
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'Number
+          :schema $ quote $ Fn Number (-> Number)
         'comp-chord-segment $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-chord-segment (p1 p2) (; println p1 p2)
             let
@@ -214,9 +208,8 @@
                     :points $ [] p1 p2
                 Option :none
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] (:: 'List 'Number) (:: 'List 'Number)
-            :return $ :: 'Option 'phlox.schema/PhloxElement
+          :schema $ quote $ Fn (List Number) (List Number)
+            -> $ Option phlox.schema/PhloxElement
         'comp-circle-polygon $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
             let
@@ -226,12 +219,12 @@
                 next-circle $ calc-next-circle center p1 (:next next-chord) e-angle0
                 child-circles $ assert-type
                   loop
-                      acc $ assert-type ([]) (:: 'List 'app.schema/ChildCircle)
+                      acc $ assert-type ([])
+                        quote $ List app.schema/ChildCircle
                       idx 0
                       cursor-point p1
-                    hint-fn $ {}
-                      :args $ [] (:: 'List 'app.schema/ChildCircle) 'Number $ :: 'List 'Number
-                      :return $ :: 'List 'app.schema/ChildCircle
+                    hint-fn $ Fn (List app.schema/ChildCircle) Number (List Number)
+                      -> $ List app.schema/ChildCircle
                     ; println acc idx cursor-point
                     if
                       or (>= idx parts)
@@ -244,7 +237,7 @@
                           conj acc $ schema/ChildCircle :p1 cursor-point :p2 (:next next-chord) :center (:center next-circle) :radius $ :radius next-circle
                           inc idx
                           :next next-chord
-                  :: 'List 'app.schema/ChildCircle
+                  quote $ List app.schema/ChildCircle
               ; println next-chord next-circle
               ; js/console.log |circles child-circles
               ; swap! config/*shapes-collection conj next-circle
@@ -315,8 +308,7 @@
                                 ; swap! *rendered-centers conj $ :center child
                                 comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'phlox.schema/PhloxElement)
-            :args $ [] 'Number 'Number 'Number (:: 'List 'Number) 'Number (:: 'List 'Number) 'Number 'Number
+          :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> phlox.schema/PhloxElement)
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-container (store)
             ; println |Store store $ :tab store
@@ -348,8 +340,7 @@
                     :color $ hslx 200 80 70
                 comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'phlox.schema/PhloxElement)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> phlox.schema/PhloxElement)
         'contains-center? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn contains-center? (xs center)
             any? xs $ fn (c)
@@ -361,28 +352,24 @@
                   .unwrap $ nth c 1
                   .unwrap $ nth center 1
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Bool)
-            :args $ []
-              :: 'List $ :: 'List 'Number
-              :: 'List 'Number
+          :schema $ quote $ Fn
+            List $ List Number
+            List Number
+            -> Bool
         'square $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn square (x) (&* x x)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'Number
+          :schema $ quote $ Fn Number (-> Number)
         'square-sum3 $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn square-sum3 (a b c)
             + (* a a) (* b b) (* c c)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'Number 'Number 'Number
+          :schema $ quote $ Fn Number Number Number (-> Number)
         'tan $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn tan (angle)
             decode-map-as (js/Math.tan angle) 'Number
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'Number
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Number (-> Number) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -395,28 +382,26 @@
         '*shapes-collection $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *shapes-collection ([])
           :examples $ []
-          :schema $ :: 'Ref $ :: 'List 'app.schema/Circle
+          :schema $ quote $ Ref (List app.schema/Circle)
         'adjacent-size $ %{} 'CodeEntry (:doc "|put how many pieces together")
           :code $ quote $ def adjacent-size (read-int-option |adjacent |5)
           :examples $ []
-          :schema $ :: 'Number
+          :schema $ quote Number
         'branch-level $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def branch-level (read-int-option |level |8)
           :examples $ []
-          :schema $ :: 'Number
+          :schema $ quote Number
         'parts $ %{} 'CodeEntry (:doc "|corners of each piece")
           :code $ quote $ def parts (read-int-option |parts |5)
           :examples $ []
-          :schema $ :: 'Number
+          :schema $ quote Number
         'read-int-option $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-int-option (key fallback)
             decode-map-as
               js/parseInt $ .unwrap-or (get-env key) fallback
               , 'Number
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'String 'String
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String String (-> Number) (:features :js-ffi)
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
             {} (:dev-ui |http://localhost:8100/main.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main.css)
@@ -425,11 +410,11 @@
               :icon |http://cdn.tiye.me/logo/quamolit.png
               :storage-key |phlox
           :examples $ []
-          :schema $ :: 'Map 'Tag 'String
+          :schema $ quote $ Map Tag String
         'space-radius $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def space-radius 400
           :examples $ []
-          :schema $ :: 'Number
+          :schema $ quote Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.config
     'app.main $ %{} 'FileEntry
@@ -437,7 +422,7 @@
         '*store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *store schema/store
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Ref (Map Tag Dynamic)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (raw-op)
             let
@@ -450,9 +435,7 @@
                 decode-map-as (js/Date.now) 'Number
               , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Enum
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Enum (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! () (; js/console.log PIXI)
             if dev? $ load-console-formatter!
@@ -462,9 +445,7 @@
             start-control-loop! 8 on-control-event
             println "|App Started"
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (js-nullish? build-errors)
@@ -476,18 +457,14 @@
               hud! |error build-errors
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             reset! *shapes-collection $ []
             render! (comp-container @*store) dispatch! $ {}
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
@@ -506,38 +483,40 @@
       :defs $ {}
         'ChildCircle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct ChildCircle
-            :p1 $ :: 'List 'Number
-            :p2 $ :: 'List 'Number
-            :center $ :: 'List 'Number
+            :p1 $ quote $ List Number
+            :p2 $ quote $ List Number
+            :center $ quote $ List Number
             :radius 'Number
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'ChordInfo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct ChordInfo
-            :center $ :: 'List 'Number
+            :center $ quote $ List Number
             :radius 'Number
             :theta1 'Number
             :theta2 'Number
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'Circle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Circle
-            :center $ :: 'List 'Number
+            :center $ quote $ List Number
             :radius 'Number
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'NextChord $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct NextChord
-            :chord-center $ :: 'List 'Number
-            :next $ :: 'List 'Number
+            :chord-center $ quote $ List Number
+            :next $ quote $ List Number
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op (:add-x) (:tab 'Tag) (:toggle-keyboard) (:counted)
-            :states (:: 'List 'Dynamic) 'Dynamic
-            :hydrate-storage $ :: 'Map 'Tag 'Dynamic
+            :states
+              quote $ List Dynamic
+              , 'Dynamic
+            :hydrate-storage $ quote $ Map Tag Dynamic
           :examples $ []
-          :schema $ :: 'EnumDef
+          :schema $ quote EnumDef
         'normalize-op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn normalize-op (op)
             match op
@@ -554,15 +533,14 @@
                 Op :hydrate-storage $ decode-map-as data $ :: 'Map 'Tag 'Dynamic
               _ $ raise |Unknown-operation
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Op)
-            :args $ [] 'Enum
+          :schema $ quote $ Fn Enum (-> app.schema/Op)
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             {} (:tab :drafts) (:x 0) (:keyboard-on? false) (:counted 0)
               :states $ {}
               :cursor $ []
           :examples $ []
-          :schema $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
     'app.updater $ %{} 'FileEntry
@@ -588,9 +566,8 @@
               (:states cursor state) (update-states store cursor state)
               (:hydrate-storage data) data
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'app.schema/Op 'String 'Number
-            :return $ :: 'Map 'Tag 'Dynamic
+          :schema $ quote $ Fn (Map Tag Dynamic) app.schema/Op String Number
+            -> $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require $ phlox.cursor :refer $ update-states
