@@ -180,11 +180,7 @@
                     :line-style $ {} (:width 1) (:alpha 1)
                       :color $ hslx 0 80 30
                   if (> r1 2000)
-                    ;nil graphics $ {} $ :ops
-                      [] (g :move-to p1)
-                        g :line-style $ {} (:width 2) (:alpha 1)
-                          :color $ hslx 200 80 70
-                        g :line-to p2
+                    group $ {}
                     graphics $ {} $ :ops
                       [] (; g :move-to p1)
                         g :line-style $ {} (:width 2) (:alpha 1)
@@ -219,8 +215,7 @@
                 next-circle $ calc-next-circle center p1 (:next next-chord) e-angle0
                 child-circles $ assert-type
                   loop
-                      acc $ assert-type ([])
-                        quote $ List app.schema/ChildCircle
+                      acc $ assert-type ([]) (List app.schema/ChildCircle)
                       idx 0
                       cursor-point p1
                     hint-fn $ Fn (List app.schema/ChildCircle) Number (List Number)
@@ -237,7 +232,7 @@
                           conj acc $ schema/ChildCircle :p1 cursor-point :p2 (:next next-chord) :center (:center next-circle) :radius $ :radius next-circle
                           inc idx
                           :next next-chord
-                  quote $ List app.schema/ChildCircle
+                  List app.schema/ChildCircle
               ; println next-chord next-circle
               ; js/console.log |circles child-circles
               ; swap! config/*shapes-collection conj next-circle
@@ -292,7 +287,8 @@
                         match
                           comp-chord-segment (:p1 child) (:p2 child)
                           (:some element) element
-                          (:none) nil
+                          (:none)
+                            group $ {}
                         let
                             caches @*rendered-centers
                           if
@@ -307,11 +303,11 @@
                               do
                                 ; swap! *rendered-centers conj $ :center child
                                 comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
+                            group $ {}
           :examples $ []
           :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> phlox.schema/PhloxElement)
         'comp-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn comp-container (store)
-            ; println |Store store $ :tab store
+          :code $ quote $ defn comp-container ()
             let
                 parts config/parts
                 adjacent config/adjacent-size
@@ -340,7 +336,7 @@
                     :color $ hslx 200 80 70
                 comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> phlox.schema/PhloxElement)
+          :schema $ quote $ Fn (-> phlox.schema/PhloxElement)
         'contains-center? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn contains-center? (xs center)
             any? xs $ fn (c)
@@ -419,28 +415,10 @@
         :code $ quote $ ns app.config
     'app.main $ %{} 'FileEntry
       :defs $ {}
-        '*store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defref *store schema/store
-          :examples $ []
-          :schema $ quote $ Ref (Map Tag Dynamic)
-        'dispatch! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dispatch! (raw-op)
-            let
-                op $ schema/normalize-op raw-op
-              when dev? $ match op
-                (:states cursor state) nil
-                _ $ js/console.log |dispatch! op
-              reset! *store $ updater @*store op
-                decode-map-as (nanoid) 'String
-                decode-map-as (js/Date.now) 'Number
-              , &unit
-          :examples $ []
-          :schema $ quote $ Fn Enum (-> Unit) (:features :js-ffi)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! () (; js/console.log PIXI)
             if dev? $ load-console-formatter!
             whenFontsReady $ fn () $ render-app!
-            add-watch! *store :change $ fn (store prev) (render-app!)
             when mobile? $ render-control!
             start-control-loop! 8 on-control-event
             println "|App Started"
@@ -449,9 +427,7 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (js-nullish? build-errors)
-              do (clear-phlox-caches!) (remove-watch! *store :change) (; js/console.clear)
-                add-watch! *store :change $ fn (store prev) (render-app!)
-                render-app!
+              do (clear-phlox-caches!) (; js/console.clear) (render-app!)
                 when mobile? $ replace-control-loop! 8 on-control-event
                 hud! |ok~ |Ok
               hud! |error build-errors
@@ -461,7 +437,9 @@
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             reset! *shapes-collection $ []
-            render! (comp-container @*store) dispatch! $ {}
+            render! (comp-container)
+              fn (_event) &unit
+              {}
             , &unit
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
@@ -470,10 +448,7 @@
           :require
             phlox.core :refer $ render! clear-phlox-caches! on-control-event
             app.comp.container :refer $ comp-container
-            app.schema :as schema
             phlox.config :refer $ dev? mobile?
-            |nanoid :refer $ nanoid
-            app.updater :refer $ updater
             |../assets/fonts.mjs :refer $ whenFontsReady
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
@@ -483,91 +458,31 @@
       :defs $ {}
         'ChildCircle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct ChildCircle
-            :p1 $ quote $ List Number
-            :p2 $ quote $ List Number
-            :center $ quote $ List Number
-            :radius 'Number
+            :p1 $ List Number
+            :p2 $ List Number
+            :center $ List Number
+            :radius Number
           :examples $ []
           :schema $ quote StructDef
         'ChordInfo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct ChordInfo
-            :center $ quote $ List Number
-            :radius 'Number
-            :theta1 'Number
-            :theta2 'Number
+            :center $ List Number
+            :radius Number
+            :theta1 Number
+            :theta2 Number
           :examples $ []
           :schema $ quote StructDef
         'Circle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Circle
-            :center $ quote $ List Number
-            :radius 'Number
+            :center $ List Number
+            :radius Number
           :examples $ []
           :schema $ quote StructDef
         'NextChord $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct NextChord
-            :chord-center $ quote $ List Number
-            :next $ quote $ List Number
+            :chord-center $ List Number
+            :next $ List Number
           :examples $ []
           :schema $ quote StructDef
-        'Op $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum Op (:add-x) (:tab 'Tag) (:toggle-keyboard) (:counted)
-            :states
-              quote $ List Dynamic
-              , 'Dynamic
-            :hydrate-storage $ quote $ Map Tag Dynamic
-          :examples $ []
-          :schema $ quote EnumDef
-        'normalize-op $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn normalize-op (op)
-            match op
-              (:add-x) (Op :add-x)
-              (:tab tab)
-                Op :tab $ decode-map-as tab 'Tag
-              (:toggle-keyboard) (Op :toggle-keyboard)
-              (:counted) (Op :counted)
-              (:states cursor data)
-                Op :states
-                  decode-map-as cursor $ :: 'List 'Dynamic
-                  , data
-              (:hydrate-storage data)
-                Op :hydrate-storage $ decode-map-as data $ :: 'Map 'Tag 'Dynamic
-              _ $ raise |Unknown-operation
-          :examples $ []
-          :schema $ quote $ Fn Enum (-> app.schema/Op)
-        'store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def store
-            {} (:tab :drafts) (:x 0) (:keyboard-on? false) (:counted 0)
-              :states $ {}
-              :cursor $ []
-          :examples $ []
-          :schema $ quote $ Map Tag Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
-    'app.updater $ %{} 'FileEntry
-      :defs $ {} $ 'updater
-        %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn updater (store op op-id op-time)
-            match op
-              (:add-x)
-                let
-                    x $ decode-map-as
-                      .unwrap $ get store :x
-                      , 'Number
-                  assoc store :x $ if (> x 10) 0 $ + x 1
-              (:tab tab) (assoc store :tab tab)
-              (:toggle-keyboard)
-                assoc store :keyboard-on? $ not $ decode-map-as
-                  .unwrap $ get store :keyboard-on?
-                  , 'Bool
-              (:counted)
-                assoc store :counted $ inc $ decode-map-as
-                  .unwrap $ get store :counted
-                  , 'Number
-              (:states cursor state) (update-states store cursor state)
-              (:hydrate-storage data) data
-          :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) app.schema/Op String Number
-            -> $ Map Tag Dynamic
-      :ns $ %{} 'NsEntry (:doc |)
-        :code $ quote $ ns app.updater
-          :require $ phlox.cursor :refer $ update-states
