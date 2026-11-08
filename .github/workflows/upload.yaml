@@ -29,7 +29,7 @@ jobs:
         run: |
           corepack enable
           corepack prepare yarn@4.18.0 --activate
-      - uses: calcit-lang/setup-calcit@v1.5.0
+      - uses: calcit-lang/setup-calcit@v1.5.1
         with:
           tools: calcit,caps
           caps-version: "0.1.1"
@@ -55,7 +55,7 @@ jobs:
           calcit --check-only --all-defs --format json
           calcit fix --workflow strict --verify --format json | jq -e '{workflow:.data.workflow,diagnostics:.diagnostics} | ., (.workflow.status == "passed" and .diagnostics == [])'
           calcit test app.comp.container/calculate-mirrored --require-match
-          calcit --check-only --ns app.comp.container --ns app.config --ns app.main --ns app.schema --ns app.updater --summary-only --format json
+          calcit --check-only --ns app.comp.container --ns app.config --ns app.main --ns app.schema --summary-only --format json
       - name: Select frontend CDN path
         id: asset-path
         env:
@@ -96,7 +96,7 @@ jobs:
       - name: Upload and verify frontend
         if: steps.production.outputs.current == 'true'
         timeout-minutes: 10
-        uses: worktools/cos-upload-action@v1.2.0
+        uses: worktools/cos-upload-action@v1.3.0
         with:
           source-dir: dist
           bucket: ${{ secrets.COS_BUCKET }}
