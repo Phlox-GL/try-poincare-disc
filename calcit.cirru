@@ -51,7 +51,7 @@
                                     mirrored $ calculate-mirrored center ([] e f) p1
                                   schema/NextChord :chord-center ([] e f) :next mirrored
           :examples $ []
-          :schema $ quote $ Fn (List Number) (List Number) Number (-> app.schema/NextChord)
+          :schema $ quote $ Fn (List Number) (List Number) Number (-> schema/NextChord)
         'calc-next-circle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calc-next-circle (center p1 p2 theta)
             let[] (a b) center $ let[] (c d) p1 $ let[] (e f) p2
@@ -91,7 +91,7 @@
                                   square $ - g c
                                   square $ - h d
           :examples $ []
-          :schema $ quote $ Fn (List Number) (List Number) (List Number) Number (-> app.schema/Circle)
+          :schema $ quote $ Fn (List Number) (List Number) (List Number) Number (-> schema/Circle)
         'calculate-chord $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-chord (p1 p2)
             let
@@ -126,7 +126,7 @@
                             theta2 $ atan2 (- d cy) (- c cx)
                           schema/ChordInfo :center ([] cx cy) :radius r1 :theta1 theta1 :theta2 theta2
           :examples $ []
-          :schema $ quote $ Fn (List Number) (List Number) (-> app.schema/ChordInfo)
+          :schema $ quote $ Fn (List Number) (List Number) (-> schema/ChordInfo)
         'calculate-mirrored $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn calculate-mirrored (p1 p2 p0)
             let[] (a b) p1 $ let[] (c d) p2 $ let[] (e f) p0
@@ -173,7 +173,7 @@
               if (> r1 2)
                 swap! config/*shapes-collection conj $ schema/Circle :center ([] cx cy) :radius r1
               if (> r1 2)
-                Option :some $ group ({})
+                Some $ group ({})
                   ; circle $ {}
                     :position $ [] cx cy
                     :radius r1
@@ -202,7 +202,7 @@
                       :color $ hslx 20 80 70
                     :position $ [] 0 0
                     :points $ [] p1 p2
-                Option :none
+                , None
           :examples $ []
           :schema $ quote $ Fn (List Number) (List Number)
             -> $ Option phlox.schema/PhloxElement
