@@ -9,7 +9,7 @@ Based on tutorial http://www.malinc.se/noneuclidean/en/poincaretiling.php
 
 ### 使用与迁移
 
-使用配对的正式 Calcit 与 `@calcit/procs` 0.41.0，以及 Phlox 0.9.3 和 Touch Control 0.0.39。
+使用配对的正式 Calcit 与 `@calcit/procs` 0.41.1，以及 Phlox 0.9.3 和 Touch Control 0.0.39。
 递归几何、深度、圆心去重和页面 HUD 沿用原实现。无弦或无递归子图时显式使用空图元。
 原镜像测试和完整 strict 通过。隔离桌面浏览器使用替代字体绘制圆盘，两次刷新后的画布像素一致。
 触控、热重载和其他浏览器尚未复验。

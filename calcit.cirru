@@ -215,11 +215,11 @@
                 next-circle $ calc-next-circle center p1 (:next next-chord) e-angle0
                 child-circles $ assert-type
                   loop
-                      acc $ assert-type ([]) (List app.schema/ChildCircle)
+                      acc $ assert-type ([]) (List schema/ChildCircle)
                       idx 0
                       cursor-point p1
-                    hint-fn $ Fn (List app.schema/ChildCircle) Number (List Number)
-                      -> $ List app.schema/ChildCircle
+                    hint-fn $ Fn (List schema/ChildCircle) Number (List Number)
+                      -> $ List schema/ChildCircle
                     ; println acc idx cursor-point
                     if
                       or (>= idx parts)
@@ -232,7 +232,7 @@
                           conj acc $ schema/ChildCircle :p1 cursor-point :p2 (:next next-chord) :center (:center next-circle) :radius $ :radius next-circle
                           inc idx
                           :next next-chord
-                  List app.schema/ChildCircle
+                  List schema/ChildCircle
               ; println next-chord next-circle
               ; js/console.log |circles child-circles
               ; swap! config/*shapes-collection conj next-circle
