@@ -206,6 +206,7 @@
           :examples $ []
           :schema $ quote $ Fn (List Number) (List Number)
             -> $ Option phlox.schema/PhloxElement
+            :features :state
         'comp-circle-polygon $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
             let
@@ -305,7 +306,7 @@
                                 comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
                             group $ {}
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> phlox.schema/PhloxElement)
+          :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> phlox.schema/PhloxElement) (:features :state)
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-container ()
             let
@@ -336,7 +337,7 @@
                     :color $ hslx 200 80 70
                 comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
           :examples $ []
-          :schema $ quote $ Fn (-> phlox.schema/PhloxElement)
+          :schema $ quote $ Fn (-> phlox.schema/PhloxElement) (:features :state)
         'contains-center? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn contains-center? (xs center)
             any? xs $ fn (c)
@@ -397,7 +398,7 @@
               js/parseInt $ .unwrap-or (get-env key) fallback
               , 'Number
           :examples $ []
-          :schema $ quote $ Fn String String (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn String String (-> Number) (:features :io :js-ffi)
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
             {} (:dev-ui |http://localhost:8100/main.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main.css)
@@ -423,7 +424,7 @@
             start-control-loop! 8 on-control-event
             println "|App Started"
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (js-nullish? build-errors)
@@ -433,7 +434,7 @@
               hud! |error build-errors
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             reset! *shapes-collection $ []
@@ -442,7 +443,7 @@
               {}
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
