@@ -85,8 +85,6 @@
                                       * t-d $ - (* c k2) (* a k2) (* d k1)
                                       * k2 b t-c
                                     - (* t-c k2) (* t-d k1)
-                                ; if (js/isNaN g) (do js/debugger nil)
-                                ; if (js/isNaN h) (do js/debugger nil)
                                 schema/Circle :center ([] g h) :radius $ sqrt $ +
                                   square $ - g c
                                   square $ - h d
