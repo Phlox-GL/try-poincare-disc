@@ -179,14 +179,11 @@
                       :color $ hslx 0 80 30
                   if (> r1 2000)
                     group $ {}
-                    graphics $ {} $ :ops
-                      [] (; g :move-to p1)
-                        g :line-style $ {} (:width 2) (:alpha 1)
-                          :color $ hslx 200 80 70
-                        g :arc $ {}
-                          :center $ [] cx cy
-                          :radius r1
-                          :radian $ if
+                    path-graphics ([] 0 0)
+                      []
+                        pschema/PathOp :line-style (hslx 200 80 70) 2 1
+                        pschema/PathOp :directed-arc-radians ([] cx cy) r1
+                          if
                             and (< theta2 theta1)
                               < (- theta1 theta2) (* 1 &PI)
                             [] theta2 theta1
@@ -194,7 +191,7 @@
                               > (- theta2 theta1) &PI
                               [] theta1 $ + 0.1 theta1
                               [] theta1 theta2
-                          :anticlockwise? false
+                          , false
                   ; polyline $ {}
                     :style $ {} (:width 1) (:alpha 1)
                       :color $ hslx 20 80 70
@@ -203,7 +200,7 @@
                 , None
           :examples $ []
           :schema $ quote $ Fn (List Number) (List Number)
-            -> $ Option phlox.schema/PhloxElement
+            -> $ Option pschema/PhloxElement
             :features :state
         'comp-circle-polygon $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-circle-polygon (parts adjacent parent-radius center radius p1 delta-angle level)
@@ -304,7 +301,7 @@
                                 comp-circle-polygon parts adjacent radius (:center child) (:radius child) (:p1 child) delta-angle $ inc level
                             group $ {}
           :examples $ []
-          :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> phlox.schema/PhloxElement) (:features :state)
+          :schema $ quote $ Fn Number Number Number (List Number) Number (List Number) Number Number (-> pschema/PhloxElement) (:features :state)
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn comp-container ()
             let
@@ -335,7 +332,7 @@
                     :color $ hslx 200 80 70
                 comp-circle-polygon parts adjacent config/space-radius ([] 0 0) r1 p0 delta-angle 0
           :examples $ []
-          :schema $ quote $ Fn (-> phlox.schema/PhloxElement) (:features :state)
+          :schema $ quote $ Fn (-> pschema/PhloxElement) (:features :state)
         'contains-center? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn contains-center? (xs center)
             any? xs $ fn (c)
@@ -368,7 +365,8 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
-            phlox.core :refer $ g hslx circle container graphics create-list group
+            phlox.core :refer $ hslx circle container path-graphics create-list group
+            phlox.schema :as pschema
             app.config :as config
             app.schema :as schema
             phlox.complex :as complex
